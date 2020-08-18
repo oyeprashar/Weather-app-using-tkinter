@@ -1,0 +1,46 @@
+from tkinter import *
+import requests
+import json
+
+root = Tk()
+root.geometry('200x100')
+
+
+def searchbyzip():
+		try:
+			zipcode=zipentry.get()
+			api_request = requests.get("http://www.airnowapi.org/aq/observation/zipCode/current/?format=application/json&zipCode="+zipcode+"&distance=5&API_KEY=2FF97EFB-2391-4403-9001-EA249EEDACDB")
+			api = json.loads(api_request.content)
+			city = api[0]['ReportingArea']
+			quality=api[0]['AQI']
+			category=api[0]['Category']['Name']
+
+			if category == "Good":
+				weather_color="#0C0"
+			elif category == "Moderate":
+				weather_color="#FFFF00"
+			elif category == "Unhealthy for Sensitive Groups":
+				weather_color="#FFFF00"
+			elif category == "Unhealthy":
+				weather_color="#FF0000"
+			elif category == "Very Unhealthy":
+				weather_color="#990066"
+			elif category == "Hazardous":
+				weather_color="#660000"
+
+			newwindow = Tk()
+			newwindow.config(bg=weather_color)
+			apilabel = Label(newwindow, text="City: "+city+'\n'+'Quality: '+str(quality)+"\n"+'Category: '+category, font=("Helvetica",20),bg=weather_color)
+			apilabel.grid(row=2,column=0,columnspan=2)
+		except Exception as ex:
+			print(ex)
+			api="No internet connection"
+			errorlabel = Label(newwindow,text=api)
+			errorlabel.grid(row=0,column=0)
+
+zipentry = Entry(root,bd=2)
+zipentry.insert(0,"          Write Zipcode")
+zipentry.grid(row=0,column=1,columnspan=2,pady=5,ipadx=10,padx=20)
+zipbutton = Button(root, text="Search By Zip",command=searchbyzip)
+zipbutton.grid(row=1,column=1,columnspan=2)
+root.mainloop()
